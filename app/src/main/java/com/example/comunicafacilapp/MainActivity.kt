@@ -20,8 +20,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             ComunicaFacilAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
+                    LoginScreen(
+                        onRegistroClick = { },
+                        onRecuperarClick = { },
                         modifier = Modifier.padding(innerPadding)
                     )
                 }

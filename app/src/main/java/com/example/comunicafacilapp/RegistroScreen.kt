@@ -1,6 +1,5 @@
 package com.example.comunicafacilapp
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -33,6 +32,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,6 +52,8 @@ fun RegistroScreen(
     var menuExpandido by remember { mutableStateOf(false) }
     var zonaResidencia by remember { mutableStateOf("") }
 
+    var errorRegistro by remember { mutableStateOf(false) }
+
     val opcionesResidencia = listOf(
         "Santiago, Chile",
         "Otra region de Chile",
@@ -57,6 +61,13 @@ fun RegistroScreen(
     )
 
     var gradoDiscapacidad by remember { mutableStateOf("") }
+
+    val opcionesGrado = listOf(
+        "Alto",
+        "Medio",
+        "Bajo"
+    )
+
     var aceptaDatosAnonimos by remember { mutableStateOf(false) }
 
     Column(
@@ -86,6 +97,7 @@ fun RegistroScreen(
             value = correo,
             onValueChange = { correo = it },
             label = { Text("Correo") },
+            isError = errorRegistro && correo.isBlank(),
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -95,6 +107,7 @@ fun RegistroScreen(
             value = nombre,
             onValueChange = { nombre = it },
             label = { Text("Nombre") },
+            isError = errorRegistro && nombre.isBlank(),
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -104,6 +117,7 @@ fun RegistroScreen(
             value = apellido,
             onValueChange = { apellido = it },
             label = { Text("Apellido") },
+            isError = errorRegistro && apellido.isBlank(),
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -114,8 +128,18 @@ fun RegistroScreen(
             onValueChange = { contrasena = it },
             label = { Text("Contraseña") },
             visualTransformation = PasswordVisualTransformation(),
+            isError = errorRegistro && contrasena.isBlank(),
             modifier = Modifier.fillMaxWidth()
         )
+
+        if (errorRegistro) {
+            Text(
+                text = "Completa todos los campos requeridos",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -176,26 +200,30 @@ fun RegistroScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         // permitir que el usuario pueda seleccionar su grado de discapacidad auditiva por medio de radiobuttons
-        OpcionGrado(
-            titulo = "Alto",
-            descripcion = "Dificultad auditiva significativa",
-            seleccionado = gradoDiscapacidad == "Alto",
-            onClick = { gradoDiscapacidad = "Alto" }
-        )
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(3),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(90.dp)
+        ) {
+            items(opcionesGrado) { opcion ->
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = opcion,
+                        fontWeight = FontWeight.Bold
+                    )
 
-        OpcionGrado(
-            titulo = "Medio",
-            descripcion = "Dificultad auditiva moderada",
-            seleccionado = gradoDiscapacidad == "Medio",
-            onClick = { gradoDiscapacidad = "Medio" }
-        )
-
-        OpcionGrado(
-            titulo = "Bajo",
-            descripcion = "Dificultad auditiva leve",
-            seleccionado = gradoDiscapacidad == "Bajo",
-            onClick = { gradoDiscapacidad = "Bajo" }
-        )
+                    RadioButton(
+                        selected = gradoDiscapacidad == opcion,
+                        onClick = {
+                            gradoDiscapacidad = opcion
+                        }
+                    )
+                }
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -218,17 +246,26 @@ fun RegistroScreen(
 
         Button(
             onClick = {
-                onRegistrarClick(
-                    Usuario(
-                        correo = correo,
-                        nombre = nombre,
-                        apellido = apellido,
-                        contrasena = contrasena,
-                        zonaResidencia = zonaResidencia,
-                        gradoDiscapacidad = gradoDiscapacidad,
-                        aceptaDatosAnonimos = aceptaDatosAnonimos
+                if (
+                    correo.isNotBlank() &&
+                    nombre.isNotBlank() &&
+                    apellido.isNotBlank() &&
+                    contrasena.isNotBlank()
+                ) {
+                    onRegistrarClick(
+                        Usuario(
+                            correo = correo,
+                            nombre = nombre,
+                            apellido = apellido,
+                            contrasena = contrasena,
+                            zonaResidencia = zonaResidencia,
+                            gradoDiscapacidad = gradoDiscapacidad,
+                            aceptaDatosAnonimos = aceptaDatosAnonimos
+                        )
                     )
-                )
+                } else {
+                    errorRegistro = true
+                }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -242,40 +279,5 @@ fun RegistroScreen(
         ) {
             Text("Volver al inicio de sesion")
         }
-    }
-}
-
-@Composable
-fun OpcionGrado(
-    titulo: String,
-    descripcion: String,
-    seleccionado: Boolean,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(
-            modifier = Modifier.weight(1f)
-        ) {
-            Text(
-                text = titulo,
-                fontWeight = FontWeight.Bold
-            )
-
-            Text(
-                text = descripcion,
-                style = MaterialTheme.typography.bodySmall
-            )
-        }
-
-        RadioButton(
-            selected = seleccionado,
-            onClick = onClick
-        )
     }
 }

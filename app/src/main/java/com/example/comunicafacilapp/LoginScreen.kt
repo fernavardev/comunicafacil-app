@@ -29,7 +29,7 @@ import androidx.compose.ui.text.withStyle
 
 @Composable
 fun LoginScreen(
-    onLoginClick: (String, String) -> Unit,
+    onLoginClick: (String, String) -> Boolean,
     onRegistroClick: () -> Unit,
     onRecuperarClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -37,6 +37,9 @@ fun LoginScreen(
     // se almacenan temporalmente los datos ingresados en campo del usuario (correo) y contraseña
     var correo by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
+
+    // controlador de estado de error para alertar visualmente a los usuarios de la app (credenciales incorrectas)
+    var errorLogin by remember { mutableStateOf(false) }
 
     // se organiza de manera vertical los elementos que forman la vista del inicio
     Column(
@@ -74,6 +77,7 @@ fun LoginScreen(
             value = correo,
             onValueChange = { correo = it },
             label = { Text("Correo") },
+            isError = errorLogin,
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -84,14 +88,25 @@ fun LoginScreen(
             onValueChange = { contrasena = it },
             label = { Text("Contraseña") },
             visualTransformation = PasswordVisualTransformation(),
+            isError = errorLogin,
             modifier = Modifier.fillMaxWidth()
         )
+
+        if (errorLogin) {
+            Text(
+                text = "Correo o contraseña incorrectos",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
             onClick = {
-                onLoginClick(correo, contrasena)
+                val loginCorrecto = onLoginClick(correo, contrasena)
+                errorLogin = !loginCorrecto
             },
             modifier = Modifier.fillMaxWidth()
         ) {

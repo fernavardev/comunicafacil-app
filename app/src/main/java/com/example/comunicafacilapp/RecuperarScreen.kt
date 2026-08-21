@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun RecuperarScreen(
-    onCambiarContrasenaClick: (String, String, String) -> Unit,
+    onCambiarContrasenaClick: (String, String, String) -> Boolean,
     onVolverClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -33,6 +33,10 @@ fun RecuperarScreen(
     var correo by remember { mutableStateOf("") }
     var nuevaContrasena by remember { mutableStateOf("") }
     var confirmarContrasena by remember { mutableStateOf("") }
+
+    // controlador para los estados de error, para informar visualmente de problemas a los usuarios (correo o contraseña)
+    var errorCorreo by remember { mutableStateOf(false) }
+    var errorContrasena by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -60,8 +64,18 @@ fun RecuperarScreen(
             value = correo,
             onValueChange = { correo = it },
             label = { Text("Correo") },
+            isError = errorCorreo,
             modifier = Modifier.fillMaxWidth()
         )
+
+        if (errorCorreo) {
+            Text(
+                text = "Correo no encontrado",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -70,6 +84,7 @@ fun RecuperarScreen(
             onValueChange = { nuevaContrasena = it },
             label = { Text("Nueva contraseña") },
             visualTransformation = PasswordVisualTransformation(),
+            isError = errorContrasena,
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -80,19 +95,39 @@ fun RecuperarScreen(
             onValueChange = { confirmarContrasena = it },
             label = { Text("Confirmar contraseña") },
             visualTransformation = PasswordVisualTransformation(),
+            isError = errorContrasena,
             modifier = Modifier.fillMaxWidth()
         )
+
+        if (errorContrasena) {
+            Text(
+                text = "Las contraseñas no coinciden",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
         // ejecutar accion para cambiar la contraseña del usuario asociado con los nuevos datos ingresados
         Button(
             onClick = {
-                onCambiarContrasenaClick(
-                    correo,
-                    nuevaContrasena,
-                    confirmarContrasena
-                )
+                if (
+                    nuevaContrasena.isNotEmpty() &&
+                    nuevaContrasena == confirmarContrasena
+                ) {
+                    val cambioCorrecto = onCambiarContrasenaClick(
+                        correo,
+                        nuevaContrasena,
+                        confirmarContrasena
+                    )
+
+                    errorCorreo = !cambioCorrecto
+                    errorContrasena = false
+                } else {
+                    errorContrasena = true
+                }
             },
             modifier = Modifier.fillMaxWidth()
         ) {

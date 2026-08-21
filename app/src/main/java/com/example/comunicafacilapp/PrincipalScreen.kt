@@ -23,8 +23,9 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun PrincipalScreen(
     usuario: Usuario,
+    onCerrarSesionClick: () -> Unit,
     modifier: Modifier = Modifier
-) {
+){
     // control sobre la visibilidad de los datos del usuario que inicia sesion en la app
     var mostrarDatos by remember { mutableStateOf(false) }
 
@@ -68,6 +69,15 @@ fun PrincipalScreen(
                 "Datos anonimos",
                 if (usuario.aceptaDatosAnonimos) "Si" else "No"
             )
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Button(
+            onClick = onCerrarSesionClick,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Cerrar sesion")
         }
     }
 }

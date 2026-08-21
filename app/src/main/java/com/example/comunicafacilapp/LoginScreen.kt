@@ -29,12 +29,13 @@ import androidx.compose.ui.text.withStyle
 
 @Composable
 fun LoginScreen(
+    onLoginClick: (String, String) -> Unit,
     onRegistroClick: () -> Unit,
     onRecuperarClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // se almacenan temporalmente los datos ingresados en campo del usuario y contraseña
-    var usuario by remember { mutableStateOf("") }
+    // se almacenan temporalmente los datos ingresados en campo del usuario (correo) y contraseña
+    var correo by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
 
     // se organiza de manera vertical los elementos que forman la vista del inicio
@@ -70,9 +71,9 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         OutlinedTextField(
-            value = usuario,
-            onValueChange = { usuario = it },
-            label = { Text("Usuario") },
+            value = correo,
+            onValueChange = { correo = it },
+            label = { Text("Correo") },
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -89,10 +90,12 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = { },
+            onClick = {
+                onLoginClick(correo, contrasena)
+            },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Iniciar sesión")
+            Text("Iniciar sesion")
         }
 
         Spacer(modifier = Modifier.height(8.dp))

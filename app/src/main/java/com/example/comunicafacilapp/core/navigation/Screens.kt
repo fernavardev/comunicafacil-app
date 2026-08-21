@@ -11,3 +11,8 @@ object Registro
 
 @Serializable
 object Recuperar
+
+@Serializable
+data class Principal(
+    val correo: String
+)

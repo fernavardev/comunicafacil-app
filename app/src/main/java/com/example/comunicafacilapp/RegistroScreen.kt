@@ -37,13 +37,14 @@ import androidx.compose.ui.unit.sp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegistroScreen(
-    onRegistrarClick: () -> Unit,
+    onRegistrarClick: (Usuario) -> Unit,
     onVolverClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     // almacenamiento de datos ingresados por el usuario y tambien opciones seleccionadas en la etapa de registro
     var correo by remember { mutableStateOf("") }
     var nombre by remember { mutableStateOf("") }
+    var apellido by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
 
     var menuExpandido by remember { mutableStateOf(false) }
@@ -100,9 +101,18 @@ fun RegistroScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
+            value = apellido,
+            onValueChange = { apellido = it },
+            label = { Text("Apellido") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
             value = contrasena,
             onValueChange = { contrasena = it },
-            label = { Text("Contrasena") },
+            label = { Text("Contraseña") },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth()
         )
@@ -207,7 +217,19 @@ fun RegistroScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = onRegistrarClick,
+            onClick = {
+                onRegistrarClick(
+                    Usuario(
+                        correo = correo,
+                        nombre = nombre,
+                        apellido = apellido,
+                        contrasena = contrasena,
+                        zonaResidencia = zonaResidencia,
+                        gradoDiscapacidad = gradoDiscapacidad,
+                        aceptaDatosAnonimos = aceptaDatosAnonimos
+                    )
+                )
+            },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Registrarse")

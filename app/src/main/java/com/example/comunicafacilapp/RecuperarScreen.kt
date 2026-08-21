@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -20,24 +21,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withStyle
 
 @Composable
-fun LoginScreen(
-    onRegistroClick: () -> Unit,
-    onRecuperarClick: () -> Unit,
+fun RecuperarScreen(
+    onCambiarContrasenaClick: () -> Unit,
+    onVolverClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // se almacenan temporalmente los datos ingresados en campo del usuario y contraseña
-    var usuario by remember { mutableStateOf("") }
-    var contrasena by remember { mutableStateOf("") }
+    // guardar de manera temporal correo y nuevas contraseñas ingresadas por el usuario en esta vista
+    var correo by remember { mutableStateOf("") }
+    var nuevaContrasena by remember { mutableStateOf("") }
+    var confirmarContrasena by remember { mutableStateOf("") }
 
-    // se organiza de manera vertical los elementos que forman la vista del inicio
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -46,68 +42,63 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        Spacer(modifier = Modifier.height(48.dp))
-
         Text(
-            text = buildAnnotatedString {
-                append("ComunicaFácil👂")
-                withStyle(
-                    style = SpanStyle(fontWeight = FontWeight.Bold)
-                ) {
-                    append("App")
-                }
-            },
+            text = "Recuperar contraseña",
             fontSize = 32.sp
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Ingresa tus datos para continuar",
+            text = "Recupera el acceso a tu cuenta",
             style = MaterialTheme.typography.bodyMedium
         )
 
         Spacer(modifier = Modifier.height(32.dp))
 
         OutlinedTextField(
-            value = usuario,
-            onValueChange = { usuario = it },
-            label = { Text("Usuario") },
+            value = correo,
+            onValueChange = { correo = it },
+            label = { Text("Correo") },
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
-            value = contrasena,
-            onValueChange = { contrasena = it },
-            label = { Text("Contraseña") },
+            value = nuevaContrasena,
+            onValueChange = { nuevaContrasena = it },
+            label = { Text("Nueva contraseña") },
+            visualTransformation = PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = confirmarContrasena,
+            onValueChange = { confirmarContrasena = it },
+            label = { Text("Confirmar contraseña") },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // ejecutar accion para cambiar la contraseña del usuario asociado con los nuevos datos ingresados
         Button(
-            onClick = { },
+            onClick = onCambiarContrasenaClick,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Iniciar sesión")
+            Text("Cambiar contraseña")
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // posibilita navegar hacia vistas de recuperacion de la contraseña y el registro
         TextButton(
-            onClick = onRecuperarClick
+            onClick = onVolverClick
         ) {
-            Text("¿Olvidaste tu contraseña?")
-        }
-
-        TextButton(
-            onClick = onRegistroClick
-        ) {
-            Text("¿No tienes cuenta? Regístrate")
+            Text("Volver al inicio de sesion")
         }
     }
 }

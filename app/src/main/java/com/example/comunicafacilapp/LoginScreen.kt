@@ -29,7 +29,7 @@ import androidx.compose.ui.text.withStyle
 
 @Composable
 fun LoginScreen(
-    onLoginClick: (String, String) -> Boolean,
+    onLoginClick: (String) -> Unit,
     onRegistroClick: () -> Unit,
     onRecuperarClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -105,7 +105,12 @@ fun LoginScreen(
 
         Button(
             onClick = {
-                val loginCorrecto = onLoginClick(correo, contrasena)
+                val loginCorrecto = UsuarioRepository.autenticar(correo, contrasena)
+
+                if (loginCorrecto) {
+                    onLoginClick(correo)
+                }
+
                 errorLogin = !loginCorrecto
             },
             modifier = Modifier.fillMaxWidth()

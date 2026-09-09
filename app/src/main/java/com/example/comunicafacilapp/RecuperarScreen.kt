@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun RecuperarScreen(
-    onCambiarContrasenaClick: (String, String, String) -> Boolean,
+    onCambiarContrasenaClick: () -> Unit,
     onVolverClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -113,19 +113,25 @@ fun RecuperarScreen(
         // ejecutar accion para cambiar la contraseña del usuario asociado con los nuevos datos ingresados
         Button(
             onClick = {
-                if (
+                val usuarioEncontrado = UsuarioRepository.buscarUsuario(correo)
+
+                if (usuarioEncontrado == null) {
+                    errorCorreo = true
+                    errorContrasena = false
+                } else if (
                     nuevaContrasena.isNotEmpty() &&
                     nuevaContrasena == confirmarContrasena
                 ) {
-                    val cambioCorrecto = onCambiarContrasenaClick(
-                        correo,
-                        nuevaContrasena,
-                        confirmarContrasena
+                    UsuarioRepository.actualizarContrasena(
+                        usuarioEncontrado,
+                        nuevaContrasena
                     )
 
-                    errorCorreo = !cambioCorrecto
+                    errorCorreo = false
                     errorContrasena = false
+                    onCambiarContrasenaClick()
                 } else {
+                    errorCorreo = false
                     errorContrasena = true
                 }
             },

@@ -36,6 +36,11 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 
+// Funcion de extension para validar el formato de correo
+fun String.esCorreoValido(): Boolean {
+    return matches(Regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"))
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegistroScreen(
@@ -48,11 +53,15 @@ fun RegistroScreen(
     var nombre by remember { mutableStateOf("") }
     var apellido by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
+    var confirmarContrasena by remember { mutableStateOf("") }
+    var errorContrasena by remember { mutableStateOf(false) }
 
     var menuExpandido by remember { mutableStateOf(false) }
     var zonaResidencia by remember { mutableStateOf("") }
 
     var errorRegistro by remember { mutableStateOf(false) }
+    var errorCorreo by remember { mutableStateOf(false) }
+    var errorCorreoExistente by remember { mutableStateOf(false) }
 
     val opcionesResidencia = listOf(
         "Santiago, Chile",
@@ -95,11 +104,35 @@ fun RegistroScreen(
 
         OutlinedTextField(
             value = correo,
-            onValueChange = { correo = it },
+            onValueChange = {
+                correo = it
+                errorCorreo = false
+                errorCorreoExistente = false
+            },
             label = { Text("Correo") },
-            isError = errorRegistro && correo.isBlank(),
+            isError = (errorRegistro && correo.isBlank()) ||
+                    errorCorreo ||
+                    errorCorreoExistente,
             modifier = Modifier.fillMaxWidth()
         )
+
+        if (errorCorreo) {
+            Text(
+                text = "El formato de correo no es valido",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        if (errorCorreoExistente) {
+            Text(
+                text = "El correo ya se encuentra registrado",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -125,12 +158,36 @@ fun RegistroScreen(
 
         OutlinedTextField(
             value = contrasena,
-            onValueChange = { contrasena = it },
+            onValueChange = {
+                contrasena = it
+                errorContrasena = false
+            },
             label = { Text("Contraseña") },
             visualTransformation = PasswordVisualTransformation(),
             isError = errorRegistro && contrasena.isBlank(),
             modifier = Modifier.fillMaxWidth()
         )
+
+        OutlinedTextField(
+            value = confirmarContrasena,
+            onValueChange = {
+                confirmarContrasena = it
+                errorContrasena = false
+            },
+            label = { Text("Confirmar contraseña") },
+            visualTransformation = PasswordVisualTransformation(),
+            isError = (errorRegistro && confirmarContrasena.isBlank()) || errorContrasena,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        if (errorContrasena) {
+            Text(
+                text = "Las contraseñas no coinciden",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
 
         if (errorRegistro) {
             Text(
@@ -247,11 +304,20 @@ fun RegistroScreen(
         Button(
             onClick = {
                 if (
-                    correo.isNotBlank() &&
-                    nombre.isNotBlank() &&
-                    apellido.isNotBlank() &&
-                    contrasena.isNotBlank()
+                    correo.isBlank() ||
+                    nombre.isBlank() ||
+                    apellido.isBlank() ||
+                    contrasena.isBlank() ||
+                    confirmarContrasena.isBlank()
                 ) {
+                    errorRegistro = true
+                } else if (!correo.esCorreoValido()) {
+                    errorCorreo = true
+                } else if (UsuarioRepository.existeCorreo(correo)) {
+                    errorCorreoExistente = true
+                } else if (contrasena != confirmarContrasena) {
+                    errorContrasena = true
+                } else {
                     onRegistrarClick(
                         Usuario(
                             correo = correo,
@@ -263,8 +329,6 @@ fun RegistroScreen(
                             aceptaDatosAnonimos = aceptaDatosAnonimos
                         )
                     )
-                } else {
-                    errorRegistro = true
                 }
             },
             modifier = Modifier.fillMaxWidth()

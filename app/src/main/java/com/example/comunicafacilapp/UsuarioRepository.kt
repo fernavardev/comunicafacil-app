@@ -60,6 +60,13 @@ class UsuarioRepository {
             }
         }
 
+        // verificacion si el correo ingresado ya existe dentro de la coleccion de la app
+        fun existeCorreo(correo: String): Boolean {
+            return usuarios.any {
+                it.correo == correo
+            }
+        }
+
         fun registrar(usuario: Usuario) {
             usuarios.add(usuario)
         }

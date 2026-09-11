@@ -19,7 +19,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrincipalScreen(
     usuario: Usuario,
@@ -29,9 +41,28 @@ fun PrincipalScreen(
     // control sobre la visibilidad de los datos del usuario que inicia sesion en la app
     var mostrarDatos by remember { mutableStateOf(false) }
 
+    // control del usuario para la categoria seleccionada y obtiene desde su repository los consejos correspondientes
+    var categoriaSeleccionada by remember {
+        mutableStateOf("Comunicación")
+    }
+
+    val consejosFiltrados =
+        ConsejoRepository.obtenerConsejosPorCategoria(categoriaSeleccionada)
+
+    val categorias = listOf(
+        "Comunicación",
+        "Emergencias",
+        "Accesibilidad"
+    )
+
+    var menuCategoriasExpandido by remember {
+        mutableStateOf(false)
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(24.dp)
     ) {
 
@@ -71,7 +102,101 @@ fun PrincipalScreen(
             )
         }
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(32.dp))
+
+        HorizontalDivider()
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            text = "Consejos útiles 💡",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Selecciona una categoría para consultar consejos que podrian ayudarte en situaciones cotidianas"
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // seleccion de una categoria por medio de un menu desplegable de material design
+        ExposedDropdownMenuBox(
+            expanded = menuCategoriasExpandido,
+            onExpandedChange = {
+                menuCategoriasExpandido = !menuCategoriasExpandido
+            }
+        ) {
+            OutlinedTextField(
+                value = categoriaSeleccionada,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Categoría") },
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(
+                        expanded = menuCategoriasExpandido
+                    )
+                },
+                modifier = Modifier
+                    .menuAnchor(
+                        type = ExposedDropdownMenuAnchorType.PrimaryNotEditable
+                    )
+                    .fillMaxWidth()
+            )
+
+            ExposedDropdownMenu(
+                expanded = menuCategoriasExpandido,
+                onDismissRequest = {
+                    menuCategoriasExpandido = false
+                }
+            ) {
+                categorias.forEach { categoria ->
+                    DropdownMenuItem(
+                        text = { Text(categoria) },
+                        onClick = {
+                            categoriaSeleccionada = categoria
+                            menuCategoriasExpandido = false
+                        }
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // presentacion de consejos filtrados por medio de tarjetas al usuario amigables visualmente para facilitar su lectura
+        consejosFiltrados.forEach { consejo ->
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 4.dp
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "${consejo.emoji} ${consejo.titulo}",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = consejo.descripcion,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
 
         Button(
             onClick = onCerrarSesionClick,
@@ -79,6 +204,8 @@ fun PrincipalScreen(
         ) {
             Text("Cerrar sesion")
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
